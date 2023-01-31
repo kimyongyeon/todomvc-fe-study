@@ -1,13 +1,13 @@
 import type { TodoData } from '../model/todo';
 
 export interface TodoRepository {
-	save(todo: TodoData): boolean;
+	save(todo: TodoData): Promise<boolean>;
 
-	update(todo: TodoData): boolean;
+	update(todo: TodoData): Promise<boolean>;
 
-	select(todo: TodoData): TodoData;
+	select(todo: TodoData): Promise<TodoData>;
 
-	list(todo: TodoData): Array<TodoData>;
+	list(todo: TodoData): Promise<Array<TodoData>>;
 
-	delete(todo: TodoData): boolean;
+	delete(todo: TodoData): Promise<boolean>;
 }

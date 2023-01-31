@@ -4,4 +4,6 @@ export class TodoTypes {
 
 	static SUCCESS_CODE = 200;
 	static FAIL_CODE = 500;
+
+	static SPLIT_COUNT = 7;
 }
