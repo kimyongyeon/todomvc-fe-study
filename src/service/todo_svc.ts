@@ -9,8 +9,8 @@ export class TodoSvc {
 		this.todoDao = todoDao;
 	}
 
-	responseResult(isResult: boolean) {
-		if (isResult) {
+	async responseResult(isResult: Promise<boolean>) {
+		if (await isResult) {
 			return {
 				code: TodoTypes.SUCCESS_CODE,
 				msg: TodoTypes.SUCCESS_MSG
@@ -23,7 +23,8 @@ export class TodoSvc {
 		}
 	}
 
-	responseFindResult(isData: TodoData | Array<TodoData>) {
+	async responseFindResult(isParam: Promise<TodoData> | Promise<Array<TodoData>>) {
+		const isData = await isParam;
 		if (isData !== undefined || isData !== null) {
 			if (Array.isArray(isData)) {
 				return {
