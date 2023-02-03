@@ -47,8 +47,8 @@ export class TodoSvc {
 		}
 	}
 
-	addTodo(todo: TodoData) {
-		this.responseResult(this.todoDao.save(todo));
+	addTodo(todo: Partial<TodoData>) {
+		return this.responseResult(this.todoDao.save(todo));
 	}
 
 	editTodo(todo: TodoData) {
@@ -59,7 +59,7 @@ export class TodoSvc {
 		this.responseResult(this.todoDao.delete(todo));
 	}
 
-	findTodo(todo: TodoData) {
+	findTodo(todo: Partial<TodoData>) {
 		this.responseFindResult(this.todoDao.select(todo));
 	}
 

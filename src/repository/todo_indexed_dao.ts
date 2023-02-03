@@ -1,4 +1,4 @@
-import { dbStore, get, idbTran, todoStore } from '../config/idb_config';
+import { dbStore, get, idbTran, todoStore } from '../config/idb';
 import { TodoData } from '../model/todo';
 import type { TodoRepository } from './todo_repository';
 

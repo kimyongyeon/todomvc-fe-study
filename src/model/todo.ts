@@ -1,7 +1,7 @@
 import { TodoTypes } from '../types/TodoTypes';
 
 export class TodoData {
-	seq: number | undefined | string;
+	seq: number | undefined;
 	title: string | undefined;
 	detail: string | undefined;
 	regDate: string | undefined;
