@@ -52,18 +52,18 @@ export class TodoSvc {
 	}
 
 	editTodo(todo: TodoData) {
-		this.responseResult(this.todoDao.update(todo));
+		return this.responseResult(this.todoDao.update(todo));
 	}
 
 	removeTodo(todo: TodoData) {
-		this.responseResult(this.todoDao.delete(todo));
+		return this.responseResult(this.todoDao.delete(todo));
 	}
 
 	findTodo(todo: Partial<TodoData>) {
-		this.responseFindResult(this.todoDao.select(todo));
+		return this.responseFindResult(this.todoDao.select(todo));
 	}
 
 	findTodos(todo: TodoData) {
-		this.responseFindResult(this.todoDao.list(todo));
+		return this.responseFindResult(this.todoDao.list(todo));
 	}
 }

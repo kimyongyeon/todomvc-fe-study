@@ -21,12 +21,12 @@ self.addEventListener('fetch', (pEvent) => {
 			.match(pEvent.request)
 			.then((response) => {
 				if (!response) {
-					console.log('네트워크에 데이터 요청!', pEvent.request);
+					// console.log('네트워크에 데이터 요청!', pEvent.request);
 					return fetch(pEvent.request);
 				}
-				console.log('캐시에 데이터 요청!', pEvent.request);
+				// console.log('캐시에 데이터 요청!', pEvent.request);
 				return response;
 			})
-			.catch((err) => console.log(err))
+			.catch((err) => console.error(err))
 	);
 });

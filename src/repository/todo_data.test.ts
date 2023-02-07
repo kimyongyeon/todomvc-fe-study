@@ -1,17 +1,20 @@
 import { describe, it, expect } from 'vitest';
-import { TodoState } from '../model/todo';
-import { TodoDao } from './todo_indexed_dao';
+import { TodoData, TodoState } from '../model/todo';
+import { TodoDexieDao } from '../dao/todo_dexie_dao';
 
 describe('save test', () => {
 
-  const todoDao = new TodoDao();
+  it('add', () => {
+    const todoDao = new TodoDexieDao();
 
-  todoDao.save({
-    seq: 1, title: 'todo title test', detail: 'todo detail test', regDate: new Date().toDateString(), editDate: new Date().toDateString(), useYn: false, state: TodoState.PLAN
-  }).then(r => console.log(r));
+    todoDao.save({
+      seq: 1, title: 'todo title test', detail: 'todo detail test', regDate: new Date().toDateString(), editDate: new Date().toDateString(), useYn: false, state: TodoState.PLAN
+    }).then(r => console.log(r));
+  });
 
-
-	it('adds 1 + 2 to equal 3', () => {
-		expect(1 + 2).toBe(3);
-	});
+  it('query', () => {
+    const todoDao = new TodoDexieDao();
+    const result = todoDao.select({...new TodoData({}), title: 'todo title test'});
+    result.then(r => console.log(r));
+  });
 });

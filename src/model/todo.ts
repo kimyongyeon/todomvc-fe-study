@@ -1,13 +1,23 @@
 import { TodoTypes } from '../types/TodoTypes';
 
 export class TodoData {
-	seq: number | undefined;
-	title: string | undefined;
-	detail: string | undefined;
-	regDate: string | undefined;
-	editDate: string | undefined;
-	useYn: boolean | undefined | string;
-	state: TodoState | undefined | string;
+	seq?: number;
+	title: string;
+	detail: string;
+	regDate: string;
+	editDate: string;
+	useYn: boolean;
+	state: TodoState;
+
+	constructor(todo: Partial<TodoData>) {
+		this.seq = todo.seq;
+		this.title = todo.title + '';
+		this.detail = todo.detail + '';
+		this.regDate = todo.regDate + '';
+		this.editDate = todo.editDate + '';
+		this.useYn = todo.useYn || true;
+		this.state = todo.state || TodoState.PLAN;
+	}
 
 	/**
 	 * TodoData 클래스를 콤마 텍스트로 변환하는 헬퍼
@@ -37,13 +47,13 @@ export class TodoData {
 			const todoDataList = strComma.split(',');
 			if (todoDataList.length === TodoTypes.SPLIT_COUNT) {
 				const todo: TodoData = {
-					seq: todoDataList[0],
+					seq: Number(todoDataList[0]),
 					title: todoDataList[1],
 					detail: todoDataList[2],
 					regDate: todoDataList[3],
 					editDate: todoDataList[4],
-					useYn: todoDataList[5],
-					state: todoDataList[6]
+					useYn: todoDataList[5] === "true" ? true : false,
+					state: todoDataList[6] === "COM" ? TodoState.COM : TodoState.PLAN
 				};
 
 				if (typeof todo.seq === 'string') {
@@ -70,7 +80,7 @@ export class TodoData {
 				return todo;
 			} else {
 				// 6자리가 안오면 매핑에 순서를 알 수 없어서 인스턴스만 리턴한다.
-				return new TodoData();
+				return new TodoData({});
 			}
 		}
 	}
