@@ -1,44 +1,56 @@
-<script>
+<script lang="ts">
 	import '../app.css';
 	import { autoSeq } from '../common/common_helper';
 	import { TodoInmemoryDao } from '../dao/todo_inmemory_dao';
+	import { TodoData } from '../model/todo';
 	import { TodoSvc } from '../service/todo_svc';
 
 	const todoSvc = new TodoSvc(new TodoInmemoryDao());
-  // add 
-  for(let i=0; i<10; i++) {
-    todoSvc.addTodo({ seq: autoSeq().next().value || 0, title: '주제: ' + i });
-  }
-  // query 
-	const result = todoSvc.findTodo({ seq: 1});
+	// add
+	for (let i = 0; i < 10; i++) {
+		todoSvc.addTodo({ seq: autoSeq().next().value || 0, title: '주제: ' + i });
+	}
+	// query
+	const result = todoSvc.findTodo({ seq: 1 });
 	result.then((r) => console.log(r));
 
-	function createClick() {
-		
+	function createClick() {}
+
+	interface ResponseType {
+		code: string;
+		msg: string;
+		body: Array<TodoData>;
 	}
+
+	let responseList: ResponseType = {
+		code: '',
+		msg: '',
+		body: []
+	};
+	$: todoSvc.findTodoDtos(new TodoData({})).then((r) => {
+		const list = r.body;
+		responseList.body = list;
+	});
 </script>
 
 <div class="container mx-auto">
 	<div class="pt-3" />
 
 	<div class="navbar bg-base-100">
-    <div class="avatar">
-      <div class="w-24 rounded">
-        <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-      </div>
-    </div>
+		<div class="avatar">
+			<div class="w-24 rounded">
+				<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+			</div>
+		</div>
 		<a class="btn btn-ghost normal-case text-xl">Todo</a>
 
-    <div class="stats shadow">
-  
-      <div class="stat">
-        <div class="stat-title">Total Page Views</div>
-        <div class="stat-value">89,400</div>
-        <div class="stat-desc">21% more than last month</div>
-      </div>
-      
-    </div>
-
+		<div class="stats shadow">
+			<div class="stat">
+				<div class="stat-title">Total Page Views</div>
+				<div class="stat-value">89,400</div>
+				<div class="stat-desc">21% more than last month</div>
+			</div>
+		</div>
 	</div>
 
 	<div class="pt-3" />
@@ -52,52 +64,31 @@
 
 	<div class="divider" />
 
-	<div class="flex ">
-		<div class="card w-96 bg-base-100 shadow-xl mr-3">
-			<div class="card-body">
-				<div class="card-actions justify-end">
-					<button class="btn btn-square btn-sm">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							><path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/></svg
-						>
-					</button>
+	<div class="flex flex-wrap">
+		{#each responseList.body as item}
+			<div class="card w-96 bg-base-100 shadow-xl mr-3 mt-3">
+				<div class="card-body">
+					<div class="card-actions justify-end">
+						<button class="btn btn-square btn-sm">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="h-6 w-6"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								><path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/></svg
+							>
+						</button>
+					</div>
+					<p>{item.title}</p>
 				</div>
-				<p>오늘은 스터디날 입니다.</p>
 			</div>
-		</div>
-
-		<div class="card w-96 bg-base-100 shadow-xl">
-			<div class="card-body">
-				<div class="card-actions justify-end">
-					<button class="btn btn-square btn-sm">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							><path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/></svg
-						>
-					</button>
-				</div>
-				<p>내일도 공부해야 합니다.</p>
-			</div>
-		</div>
+		{/each}
 	</div>
 
 	<div class="alert alert-info shadow-lg hidden">
@@ -118,12 +109,7 @@
 		</div>
 	</div>
 
-  
-
 	<div class="btm-nav">
-
-
-
 		<button>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"

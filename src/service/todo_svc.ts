@@ -66,4 +66,16 @@ export class TodoSvc {
 	findTodos(todo: TodoData) {
 		return this.responseFindResult(this.todoDao.list(todo));
 	}
+
+	findTodoDtos(todo: TodoData) {
+		return new Promise((resolve, reject) => {
+			this.todoDao.list(todo).then((r) => {
+				resolve({
+					code: 200,
+					msg: 'success',
+					body: r
+				});
+			});
+		});
+	}
 }
