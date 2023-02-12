@@ -59,6 +59,10 @@ export class TodoSvc {
 		return this.responseResult(this.todoDao.delete(todo));
 	}
 
+	allRemoveTodo() {
+		return this.responseResult(this.todoDao.allDelete());
+	}
+
 	findTodo(todo: Partial<TodoData>) {
 		return this.responseFindResult(this.todoDao.select(todo));
 	}

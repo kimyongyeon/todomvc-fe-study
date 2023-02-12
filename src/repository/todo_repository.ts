@@ -10,4 +10,5 @@ export interface TodoRepository {
 	list(todo: TodoData): Promise<Array<TodoData>>;
 
 	delete(todo: TodoData): Promise<boolean>;
+	allDelete(): Promise<boolean> ;
 }

@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { TodoData, TodoState } from '../model/todo';
+import { describe, it } from 'vitest';
 import { TodoDexieDao } from '../dao/todo_dexie_dao';
+import { TodoData, TodoState } from '../model/todo';
 
 describe('save test', () => {
 

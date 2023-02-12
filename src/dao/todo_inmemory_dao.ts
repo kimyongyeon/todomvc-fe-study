@@ -5,7 +5,12 @@ export class TodoInmemoryDao implements TodoRepository {
 	private todoList: TodoData[] = [];
 
 	save(todo: TodoData): Promise<boolean> {
-		this.todoList.push(todo);
+		if (todo.sort) {
+			this.todoList.unshift(todo);
+		} else {
+			this.todoList.push(todo);
+		}
+		
 		return Promise.resolve(true);
 	}
 	update(todo: TodoData): Promise<boolean> {
@@ -22,6 +27,11 @@ export class TodoInmemoryDao implements TodoRepository {
 	}
 	delete(todo: TodoData): Promise<boolean> {
     this.todoList = this.todoList.filter(t => t.seq !== todo.seq);
+		return Promise.resolve(true);
+	}
+
+	allDelete(): Promise<boolean> {
+		this.todoList = [];
 		return Promise.resolve(true);
 	}
 }

@@ -8,6 +8,8 @@ export class TodoData {
 	editDate: string;
 	useYn: boolean;
 	state: TodoState;
+	sort: boolean;
+	rowNewItem: boolean;
 
 	constructor(todo: Partial<TodoData>) {
 		this.seq = todo.seq;
@@ -15,8 +17,10 @@ export class TodoData {
 		this.detail = todo.detail + '';
 		this.regDate = todo.regDate + '';
 		this.editDate = todo.editDate + '';
-		this.useYn = todo.useYn || true;
-		this.state = todo.state || TodoState.PLAN;
+		this.useYn = todo.useYn ?? true;
+		this.state = todo.state ?? TodoState.PLAN;
+		this.sort = todo.sort ?? true; // 화면 전용
+		this.rowNewItem = todo.rowNewItem ?? true; // 화면전용
 	}
 
 	/**
@@ -46,7 +50,7 @@ export class TodoData {
 		if (typeof strComma === 'string') {
 			const todoDataList = strComma.split(',');
 			if (todoDataList.length === TodoTypes.SPLIT_COUNT) {
-				const todo: TodoData = {
+				const todo: Partial<TodoData> = {
 					seq: Number(todoDataList[0]),
 					title: todoDataList[1],
 					detail: todoDataList[2],

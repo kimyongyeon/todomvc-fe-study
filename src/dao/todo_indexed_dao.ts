@@ -1,10 +1,14 @@
 import { dbStore, get, idbTran, todoStore } from '../config/idb';
 import { TodoData } from '../model/todo';
-import type { TodoRepository } from './todo_repository';
+import type { TodoRepository } from '../repository/todo_repository';
+
 
 // todo: indexeddb를 활용해서 저장하고 처리 한다.
 
 export class TodoDao implements TodoRepository {
+	allDelete(): Promise<boolean> {
+		throw new Error('Method not implemented.');
+	}
 	list(todo: TodoData): Promise<TodoData[]> {
 		throw new Error('Method not implemented.');
 	}

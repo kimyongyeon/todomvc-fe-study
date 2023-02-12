@@ -3,6 +3,9 @@ import type { TodoRepository } from "../repository/todo_repository";
 import { db, type TodoEntity } from '../config/db';
 
 export class TodoDexieDao implements TodoRepository {
+	allDelete(): Promise<boolean> {
+		throw new Error("Method not implemented.");
+	}
 	list(todo: TodoData): Promise<TodoData[]> {
 		throw new Error('Method not implemented.');
 	}
