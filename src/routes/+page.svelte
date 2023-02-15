@@ -1,15 +1,25 @@
 <script lang="ts">
 	import axios from 'axios';
 	import { onMount } from 'svelte';
+	import { CommonFactory } from '../common/common_factory';
 	import { autoSeq } from '../common/common_helper';
-	import { TodoInmemoryDao } from '../dao/todo_inmemory_dao';
+	import ListComponent from '../components/ListComponent.svelte';
+	import type { ComTodoInmemoryDao } from '../dao/com_todo_dao';
 	import { TodoData } from '../model/todo';
-	import { TodoSvc } from '../service/todo_svc';
+	import { compList } from '../store/store';
 	import '../styles/app.css';
+	import { TodoTypes } from '../types/TodoTypes';
+
+	import echarts, { init } from 'echarts';
+	import { invalid_attribute_name_character } from 'svelte/internal';
 
 	const baseURL = 'https://random-data-api.com/api/v2';
 
-	const todoSvc = new TodoSvc(new TodoInmemoryDao());
+	const todoSvc = CommonFactory.createSvc(TodoTypes.FAC_IM);
+
+	const todoCompDao: ComTodoInmemoryDao = CommonFactory.createDao(
+		TodoTypes.FAC_COM
+	) as ComTodoInmemoryDao;
 
 	let avatarUrl = '';
 
@@ -26,6 +36,7 @@
 	onMount(async () => {
 		getRandomUsers();
 		initList();
+		initChart();
 	});
 
 	function initList() {
@@ -44,7 +55,13 @@
 		body: Array<TodoData>;
 	}
 
-	let responseList: ResponseType = {
+	export let responseList: ResponseType = {
+		code: '',
+		msg: '',
+		body: []
+	};
+
+	export let comReponseList: ResponseType = {
 		code: '',
 		msg: '',
 		body: []
@@ -90,6 +107,27 @@
 		todoSvc.findTodoDtos(new TodoData({})).then((r: any) => {
 			const list = r.body;
 			responseList.body = list;
+		});
+	}
+
+	function comList() {
+
+		console.log('compList => ', compList);
+
+		compList.subscribe((v) => {
+
+			console.log('v => ', v);
+			if (v !== undefined) {
+				comReponseList.code = '200';
+				comReponseList.msg = 'success';
+				comReponseList.body = v;
+			} else {
+				comReponseList.code = '500';
+				comReponseList.msg = 'fail';
+				comReponseList.body = [];
+			}
+
+			
 		});
 	}
 
@@ -140,6 +178,7 @@
 	// useState
 	// $: getRandomUsers();
 	$: list();
+	// $: comList();
 	$: sortType = true;
 	$: getTodayCountCalc();
 
@@ -159,11 +198,51 @@
 			naviCurrentIndex = 0;
 		} else if (selector === 'list') {
 			naviCurrentIndex = 1;
+			comList();
 		} else if (selector === 'chart') {
 			naviCurrentIndex = 2;
 		} else {
 			naviCurrentIndex = 0;
 		}
+		
+	}
+	
+	function initChart() {
+		let chart = echarts.init(document.getElementById("app"));
+		let options = {
+			title: {
+				text: 'Todo 통계 차트',
+				subtext: '데이터는 받아서 넣어야 합니다. 아직 입니다.',
+				left: 'center'
+			},
+			tooltip: {
+				trigger: 'item'
+			},
+			legend: {
+				orient: 'vertical',
+				left: 'left'
+			},
+			series: [
+				{
+					name: 'Access From',
+					type: 'pie',
+					radius: '50%',
+					data: [
+						{ value: 1048, name: '완료' },
+						{ value: 735, name: '계획' },
+						{ value: 580, name: '취소' },
+					],
+					emphasis: {
+						itemStyle: {
+							shadowBlur: 10,
+							shadowOffsetX: 0,
+							shadowColor: 'rgba(0, 0, 0, 0.5)'
+						}
+					}
+				}
+			]
+		};
+		chart.setOption(options);
 	}
 </script>
 
@@ -196,7 +275,11 @@
 		class="input input-bordered w-30 max-w-xs"
 		bind:value={inputText}
 		bind:this={inputRef}
-		on:keydown={e => { if(e.keyCode === 13) { createClick()}} }
+		on:keydown={(e) => {
+			if (e.keyCode === 13) {
+				createClick();
+			}
+		}}
 		placeholder="오늘 할일을 기입하세요."
 	/>
 
@@ -229,39 +312,15 @@
 	<div class="divider" />
 
 	<section class:hidden={naviCurrentIndex != 0}>
-		<div class="flex flex-wrap p-4">
-			{#each responseList.body as item}
-				<div class="card w-96 bg-base-100 shadow-xl mr-3 mt-3">
-					<div class="card-body">
-						<div class="card-actions justify-start">
-							<h2 class="flex-1">이름 : {item.title}</h2>
-							<button class="btn btn-square btn-sm" on:click={(e) => deleteClick(item)}>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									class="h-6 w-6"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-									><path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M6 18L18 6M6 6l12 12"
-									/></svg
-								>
-							</button>
-						</div>
-
-						<p>작성일자 : {item.detail}</p>
-						<div class="badge badge-error gap-2" class:hidden={item.rowNewItem}>new</div>
-					</div>
-				</div>
-			{/each}
-		</div>
+		<ListComponent {responseList} {deleteClick} />
 	</section>
 
-	<section class:hidden={naviCurrentIndex != 1}>list</section>
-	<section class:hidden={naviCurrentIndex != 2}>chart</section>
+	<section class:hidden={naviCurrentIndex != 1}>
+		<ListComponent responseList={comReponseList} {deleteClick} />
+	</section>
+	<section class:hidden={naviCurrentIndex != 2}>
+		<div id="app"/>
+	</section>
 
 	<div class="alert alert-info shadow-lg hidden">
 		<div>
@@ -329,3 +388,10 @@
 		</button>
 	</div>
 </div>
+
+<style>
+	#app {
+		width: 750px;
+		height: 500px;
+	}
+</style>

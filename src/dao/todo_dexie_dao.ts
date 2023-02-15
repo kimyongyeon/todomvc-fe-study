@@ -39,7 +39,8 @@ export class TodoDexieDao implements TodoRepository {
 	}
 	select(todo: TodoData): Promise<TodoData> {
 
-		const todoResult = db.table('todos').toArray();
+		const todoResult = db.table('todos')
+		.toArray();
 
 		console.log('todoResult: ', todoResult);
 

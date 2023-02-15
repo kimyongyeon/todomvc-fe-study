@@ -6,4 +6,9 @@ export class TodoTypes {
 	static FAIL_CODE = 500;
 
 	static SPLIT_COUNT = 7;
+
+	static FAC_COM = 'com';
+	static FAC_DEX = 'dex';
+	static FAC_IDX = 'idx';
+	static FAC_IM = 'im';
 }
