@@ -12,3 +12,23 @@ export class TodoTypes {
 	static FAC_IDX = 'idx';
 	static FAC_IM = 'im';
 }
+
+import type { TodoData } from '../model/todo';
+
+export interface ResponseTodoType {
+	code: string;
+	msg: string;
+	body: Array<TodoData>;
+}
+
+export const responseList: ResponseTodoType = {
+	code: '',
+	msg: '',
+	body: []
+};
+
+export const comReponseList: ResponseTodoType = {
+	code: '',
+	msg: '',
+	body: []
+};

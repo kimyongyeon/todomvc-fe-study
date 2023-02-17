@@ -1,27 +1,39 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import axios from 'axios';
+	import echarts, { type EChartOption } from 'echarts';
 	import { onMount } from 'svelte';
 	import { CommonFactory } from '../common/common_factory';
 	import { autoSeq } from '../common/common_helper';
 	import ListComponent from '../components/ListComponent.svelte';
-	import type { ComTodoInmemoryDao } from '../dao/com_todo_dao';
-	import { TodoData } from '../model/todo';
-	import { compList } from '../store/store';
+	import { TodoData, TodoState } from '../model/todo';
+	import { allCompListDelete, compList } from '../store/store';
 	import '../styles/app.css';
-	import { TodoTypes } from '../types/TodoTypes';
+	import {
+		comReponseList,
+		responseList,
+		TodoTypes,
+		type ResponseTodoType
+	} from '../types/TodoTypes';
 
-	import echarts, { init } from 'echarts';
-	import { invalid_attribute_name_character } from 'svelte/internal';
+	let date = new Date();
+	let dayCount = new Date(date.getUTCFullYear(), date.getMonth() + 1, 0).getDate();
+	let inputText = '';
+	let inputRef: any;
+	let sortType: boolean = true;
+	let hiddenShow: boolean = true;
+	let avatarUrl = '';
+	let todayCount = 0;
+	let naviCurrentIndex = 0;
+	export let y: number;
 
 	const baseURL = 'https://random-data-api.com/api/v2';
-
 	const todoSvc = CommonFactory.createSvc(TodoTypes.FAC_IM);
 
-	const todoCompDao: ComTodoInmemoryDao = CommonFactory.createDao(
-		TodoTypes.FAC_COM
-	) as ComTodoInmemoryDao;
-
-	let avatarUrl = '';
+	onMount(async () => {
+		await getRandomUsers();
+		initChart();
+	});
 
 	async function getRandomUsers() {
 		try {
@@ -33,44 +45,18 @@
 		}
 	}
 
-	onMount(async () => {
-		getRandomUsers();
-		initList();
-		initChart();
-	});
-
 	function initList() {
 		for (let i = 0; i < 10; i++) {
 			todoSvc.addTodo({
 				seq: autoSeq().next().value || 0,
 				title: '주제 ~~~ ' + i,
 				detail: new Date().toDateString(),
+				state: TodoState.PLAN,
 				rowNewItem: true
 			});
 		}
 	}
-	interface ResponseType {
-		code: string;
-		msg: string;
-		body: Array<TodoData>;
-	}
 
-	export let responseList: ResponseType = {
-		code: '',
-		msg: '',
-		body: []
-	};
-
-	export let comReponseList: ResponseType = {
-		code: '',
-		msg: '',
-		body: []
-	};
-
-	let inputText = '';
-	let inputRef: any;
-	let sortType: boolean = true;
-	let hiddenShow: boolean = true;
 	function inputValid() {
 		if (!inputText) {
 			hiddenShow = false;
@@ -82,41 +68,23 @@
 			return false;
 		}
 	}
-	function createClick() {
-		if (inputValid()) return;
-
-		const todo = new TodoData({
-			seq: autoSeq().next().value || 0,
-			title: inputText,
-			sort: sortType,
-			detail: new Date().toLocaleDateString(),
-			rowNewItem: false
-		});
-		console.log(todo);
-		todoSvc.addTodo(todo);
-		list();
-		inputInit();
-	}
 
 	function inputInit() {
 		inputText = '';
 		inputRef.focus();
 	}
 
-	function list() {
-		todoSvc.findTodoDtos(new TodoData({})).then((r: any) => {
-			const list = r.body;
-			responseList.body = list;
-		});
+	async function list() {
+		try {
+			const result: ResponseTodoType & any = await todoSvc.findTodoDtos(new TodoData({}));
+			responseList.body = result.body;
+		} catch (e) {
+			console.log(e);
+		}
 	}
 
 	function comList() {
-
-		console.log('compList => ', compList);
-
 		compList.subscribe((v) => {
-
-			console.log('v => ', v);
 			if (v !== undefined) {
 				comReponseList.code = '200';
 				comReponseList.msg = 'success';
@@ -126,9 +94,43 @@
 				comReponseList.msg = 'fail';
 				comReponseList.body = [];
 			}
-
-			
 		});
+	}
+
+	function getTodayCountCalc() {
+		if (browser) {
+			todayCount = Number(localStorage.getItem('todayCount') || 0);
+			todayCount = todayCount + 1;
+			localStorage.setItem('todayCount', todayCount + '');
+		}
+	}
+
+	function createClick() {
+		if (inputValid()) return;
+		todoSvc.addTodo({
+			seq: autoSeq().next().value || 0,
+			title: inputText,
+			sort: sortType,
+			detail: new Date().toLocaleDateString(),
+			rowNewItem: false
+		});
+		list();
+		inputInit();
+	}
+
+	function naviClick(selector: any) {
+		if (selector === 'home') {
+			naviCurrentIndex = 0;
+			list();
+		} else if (selector === 'list') {
+			naviCurrentIndex = 1;
+			comList();
+		} else if (selector === 'chart') {
+			naviCurrentIndex = 2;
+			initChart();
+		} else {
+			naviCurrentIndex = 0;
+		}
 	}
 
 	function deleteClick(todo: TodoData) {
@@ -147,38 +149,44 @@
 
 	function sortClick() {
 		if (sortType) {
-			responseList.body = responseList.body.sort((a, b) => b.seq - a.seq);
+			// 유니온이 답인가?
+			responseList.body = responseList.body.sort(
+				(a: TodoData & any, b: TodoData & any) => b.seq - a.seq
+			);
 		} else {
-			responseList.body = responseList.body.sort((a, b) => a.seq - b.seq);
+			responseList.body = responseList.body.sort(
+				(a: TodoData & any, b: TodoData & any) => a.seq - b.seq
+			);
 		}
 		sortType = !sortType;
-		console.log(responseList.body, sortType);
 	}
 
 	function reloadClick() {
-		// getRandomUsers();
 		allRemoveClick();
+		allCompListDelete();
 		initList();
 		list();
 	}
 
-	let todayCount = 0;
+	async function initDefaultList() {
+		if (browser) {
+			const fac = sessionStorage.getItem('FAC');
 
-	function getTodayCountCalc() {
-		todayCount = Number(sessionStorage.getItem('todayCount') || 0);
-		todayCount = todayCount + 1;
-		sessionStorage.setItem('todayCount', todayCount + '');
+			if (fac === TodoTypes.FAC_DEX) {
+				todoSvc.allRemoveTodo();
+			}
+		}
+		initList();
+		await list();
 	}
 
-	let date = new Date();
-	let dayCount = new Date(date.getUTCFullYear(), date.getMonth() + 1, 0).getDate();
-
-	let newHidden: boolean = true;
-
-	// useState
-	// $: getRandomUsers();
-	$: list();
-	// $: comList();
+	$: (async function () {
+		try {
+			await initDefaultList();
+		} catch (e) {
+			console.log(e);
+		}
+	})();
 	$: sortType = true;
 	$: getTodayCountCalc();
 
@@ -190,25 +198,10 @@
 			});
 		}, 3000);
 	}
-	export let y;
 
-	let naviCurrentIndex = 0;
-	function naviClick(selector: any) {
-		if (selector === 'home') {
-			naviCurrentIndex = 0;
-		} else if (selector === 'list') {
-			naviCurrentIndex = 1;
-			comList();
-		} else if (selector === 'chart') {
-			naviCurrentIndex = 2;
-		} else {
-			naviCurrentIndex = 0;
-		}
-		
-	}
-	
 	function initChart() {
-		let chart = echarts.init(document.getElementById("app"));
+		// let totalList = [...responseList.body, ...comReponseList.body];
+		let chart = echarts.init(document.getElementById('app') as HTMLCanvasElement);
 		let options = {
 			title: {
 				text: 'Todo 통계 차트',
@@ -230,7 +223,7 @@
 					data: [
 						{ value: 1048, name: '완료' },
 						{ value: 735, name: '계획' },
-						{ value: 580, name: '취소' },
+						{ value: 580, name: '취소' }
 					],
 					emphasis: {
 						itemStyle: {
@@ -242,7 +235,7 @@
 				}
 			]
 		};
-		chart.setOption(options);
+		chart.setOption(options as EChartOption);
 	}
 </script>
 
@@ -257,8 +250,8 @@
 				<img src={avatarUrl} alt="프로필 사진" />
 			</div>
 		</div>
+		<!-- svelte-ignore a11y-missing-attribute -->
 		<a class="btn btn-ghost normal-case text-xl">Todo</a>
-
 		<div class="stats shadow">
 			<div class="stat">
 				<div class="stat-title">Total Page Views</div>
@@ -283,11 +276,25 @@
 		placeholder="오늘 할일을 기입하세요."
 	/>
 
-	<button class="btn btn-success" on:click={createClick}>추가</button>
-	<button class="btn btn-warning" on:click={initClick}>초기화</button>
-	<button class="btn btn-primary" on:click={sortClick}>{sortType ? '오름차순' : '내림차순'}</button>
-	<button class="btn btn-primary" on:click={allRemoveClick}>모두삭제</button>
-	<button class="btn btn-primary" on:click={reloadClick}>리로드</button>
+	<div class="tooltip" data-tip="텍스트필드에 입력한 값을 Todo으로 추가 합니다.">
+		<button class="btn btn-success" on:click={createClick}>추가</button>
+	</div>
+	<div class="tooltip" data-tip="입력한 값을 초기화 합니다.">
+		<button class="btn btn-warning" on:click={initClick}>초기화</button>
+	</div>
+
+	<div class="tooltip" data-tip="제목을 오름/내림 차순으로 정렬 합니다.">
+		<button class="btn btn-primary" on:click={sortClick}
+			>{sortType ? '오름차순' : '내림차순'}</button
+		>
+	</div>
+	<div class="tooltip" data-tip="계획하고 완료된 Todo를 모두삭제 합니다.">
+		<button class="btn btn-primary" on:click={allRemoveClick}>모두삭제</button>
+	</div>
+
+	<div class="tooltip" data-tip="더미계획 Todo만 남기고 완료된 Todo는 삭제 합니다.">
+		<button class="btn btn-primary" on:click={reloadClick}>리로드</button>
+	</div>
 	<span class="badge badge-lg">{responseList.body.length}</span>
 
 	<div class="alert alert-error shadow-lg mt-4" class:hidden={hiddenShow}>
@@ -319,7 +326,7 @@
 		<ListComponent responseList={comReponseList} {deleteClick} />
 	</section>
 	<section class:hidden={naviCurrentIndex != 2}>
-		<div id="app"/>
+		<div id="app" />
 	</section>
 
 	<div class="alert alert-info shadow-lg hidden">

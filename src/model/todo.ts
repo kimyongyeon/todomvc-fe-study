@@ -2,8 +2,8 @@ import { TodoTypes } from '../types/TodoTypes';
 
 export class TodoData {
 	seq?: number;
-	title: string;
-	detail: string;
+	title: string | undefined;
+	detail?: string;
 	regDate: string;
 	editDate: string;
 	useYn: boolean;
@@ -25,7 +25,7 @@ export class TodoData {
 
 	/**
 	 * TodoData 클래스를 콤마 텍스트로 변환하는 헬퍼
-	 * @param todo 
+	 * @param todo
 	 * @returns "1234,제목,상세내용,20230129,20230129,Y,COM"
 	 */
 	static dtoToCommaTextHelper(todo: TodoData) {
@@ -41,9 +41,9 @@ export class TodoData {
 	}
 
 	/**
-	 * 콤마 텍스트를 TodoData 클래스로 변환하는 헬퍼 
-	 * @param strComma 
-	 * @condition 반드시 7자리가 와야 한다. 즉, 데이터가 하나도 없으면 처리 할 수 없다. 
+	 * 콤마 텍스트를 TodoData 클래스로 변환하는 헬퍼
+	 * @param strComma
+	 * @condition 반드시 7자리가 와야 한다. 즉, 데이터가 하나도 없으면 처리 할 수 없다.
 	 * @returns new TodoData();
 	 */
 	static textCommaToDtoHelper(strComma: string) {
@@ -56,8 +56,8 @@ export class TodoData {
 					detail: todoDataList[2],
 					regDate: todoDataList[3],
 					editDate: todoDataList[4],
-					useYn: todoDataList[5] === "true" ? true : false,
-					state: todoDataList[6] === "COM" ? TodoState.COM : TodoState.PLAN
+					useYn: todoDataList[5] === 'true' ? true : false,
+					state: todoDataList[6] === 'COM' ? TodoState.COM : TodoState.PLAN
 				};
 
 				if (typeof todo.seq === 'string') {

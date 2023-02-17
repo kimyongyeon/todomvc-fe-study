@@ -1,3 +1,4 @@
+import { TodoDexieDao } from '../dao/todo_dexie_dao';
 import type { TodoData } from '../model/todo';
 import type { TodoRepository } from '../repository/todo_repository';
 import { TodoTypes } from '../types/TodoTypes';
@@ -73,13 +74,18 @@ export class TodoSvc {
 
 	findTodoDtos(todo: TodoData) {
 		return new Promise((resolve, reject) => {
-			this.todoDao.list(todo).then((r) => {
-				resolve({
-					code: 200,
-					msg: 'success',
-					body: r
+			try {
+				this.todoDao.list(todo).then((r) => {
+					console.log('findTodoDtos, ', r);
+					resolve({
+						code: 200,
+						msg: 'success',
+						body: r
+					});
 				});
-			});
+			} catch (e) {
+				reject(e);
+			}
 		});
 	}
 }

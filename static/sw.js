@@ -5,7 +5,6 @@ self.addEventListener('install', (pEvent) => {
 	console.log('서비스 워커 설치함');
 	pEvent.waitUntil(
 		caches.open(sCacheName).then((pCache) => {
-			console.log('파일을 캐시에 저장함!');
 			return pCache.addAll(aFilesToCache);
 		})
 	);
@@ -16,17 +15,19 @@ self.addEventListener('activate', (pEvent) => {
 });
 
 self.addEventListener('fetch', (pEvent) => {
+	console.log('Fetching somthing!!', pEvent.request.url);
+	// pEvent.respondWith(fetch(pEvent.request));
 	pEvent.respondWith(
-		caches
-			.match(pEvent.request)
-			.then((response) => {
-				if (!response) {
-					// console.log('네트워크에 데이터 요청!', pEvent.request);
-					return fetch(pEvent.request);
-				}
-				// console.log('캐시에 데이터 요청!', pEvent.request);
-				return response;
-			})
-			.catch((err) => console.error(err))
+		caches.match(pEvent.request).then((res) => {
+			if (res) {
+				// cache에 있다면 cache된 데이터 제공
+				console.log('cached : ', res);
+				return res;
+			} else {
+				// cache에 없다면 서버로 요청
+				console.log('network request ');
+				return fetch(pEvent.request);
+			}
+		})
 	);
 });
