@@ -1,5 +1,8 @@
-const sCacheName = 'hello-pwa';
+const sCacheName = 'hello-pwa-v1';
 const aFilesToCache = ['./', './manifest.json', './favicon.png'];
+const apiCacheName = 'api-v1';
+
+caches.delete(apiCacheName);
 
 self.addEventListener('install', (pEvent) => {
 	console.log('서비스 워커 설치함');
@@ -12,22 +15,33 @@ self.addEventListener('install', (pEvent) => {
 
 self.addEventListener('activate', (pEvent) => {
 	console.log('서비스 워커 동작 시작됨!');
+	pEvent.waitUntil(
+		caches.keys().then(function (cacheNames) {
+			return Promise.all(
+				cacheNames.map(function (cacheName) {
+					if (sCacheName !== cacheName && cacheName.startsWith('hello-pwa')) {
+						return caches.delete(cacheName);
+					}
+				})
+			);
+		})
+	);
 });
 
+// https://carmalou.com/lets-take-this-offline/2019/04/16/cache-requests-with-service-worker.html
 self.addEventListener('fetch', (pEvent) => {
 	console.log('Fetching somthing!!', pEvent.request.url);
-	// pEvent.respondWith(fetch(pEvent.request));
 	pEvent.respondWith(
-		caches.match(pEvent.request).then((res) => {
-			if (res) {
-				// cache에 있다면 cache된 데이터 제공
-				console.log('cached : ', res);
-				return res;
-			} else {
-				// cache에 없다면 서버로 요청
-				console.log('network request ');
-				return fetch(pEvent.request);
-			}
+		caches.match(pEvent.request).then(function (r) {
+			return (
+				r ||
+				fetch(pEvent.request).then(function (response) {
+					return caches.open(apiCacheName).then(function (cache) {
+						cache.put(pEvent.request, response.clone());
+						return response;
+					});
+				})
+			);
 		})
 	);
 });

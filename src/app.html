@@ -5,15 +5,28 @@
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<script src="./sw.js"></script>
 		<meta name="viewport" content="width=device-width" />
-		<link rel="stylesheet" href="./app.css">
+		<link rel="stylesheet" href="./app.css" />
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 		<script>
 			if ('serviceWorker' in navigator) {
+				//returns installed service workers
 				window.addEventListener('load', () => {
-					navigator.serviceWorker.register('./sw.js', { scope: '/' });
+					navigator.serviceWorker
+						.register('./sw.js?v=1', { scope: '/' })
+						.then((registration) => {
+							// registration worked
+							// console.log('Registration succeeded.');
+							// button.onclick = () => {
+							// 	registration.update();
+							// };
+						})
+						.catch((error) => {
+							// registration failed
+							console.error(`Registration failed with ${error}`);
+						});
 				});
 			}
 		</script>

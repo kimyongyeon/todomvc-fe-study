@@ -76,7 +76,7 @@ export class TodoSvc {
 		return new Promise((resolve, reject) => {
 			try {
 				this.todoDao.list(todo).then((r) => {
-					console.log('findTodoDtos, ', r);
+					// console.log('findTodoDtos, ', r);
 					resolve({
 						code: 200,
 						msg: 'success',

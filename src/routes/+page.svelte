@@ -38,6 +38,7 @@
 	async function getRandomUsers() {
 		try {
 			const result = await axios.get(baseURL + '/users?size=10&is_xml=true');
+			console.log('result ssss : ', result);
 			avatarUrl = result.data[0]?.avatar;
 			return result;
 		} catch (err) {
@@ -251,7 +252,7 @@
 			</div>
 		</div>
 		<!-- svelte-ignore a11y-missing-attribute -->
-		<a class="btn btn-ghost normal-case text-xl">Todo</a>
+		<a class="btn btn-ghost normal-case text-xl">내가 원하는 Todo</a>
 		<div class="stats shadow">
 			<div class="stat">
 				<div class="stat-title">Total Page Views</div>
